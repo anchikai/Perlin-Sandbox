@@ -1,14 +1,11 @@
 local Global = require("lua.GlobalValues")
-local Camera = require("lua.Camera")
 local BlockType = require("lua.BlockType")
-local Assets    = require("lua.Assets")
+local Assets = require("lua.Assets")
 
 local Cave = {
-    Grid = {}
+    Grid = {},
+    Size = 1 + 256
 }
-
-local WORLD_SIZE = 256 ---@type number
-WORLD_SIZE = WORLD_SIZE + 1
 
 ---@param x number
 ---@return number
@@ -18,9 +15,10 @@ end
 
 ---@param caveSize number
 local function generateCave(caveSize)
-    -- Fill each tile in our grid with noise.
     local baseX = 10000 * love.math.random()
     local baseY = 10000 * love.math.random()
+
+    -- Stone
     for y = -caveSize, caveSize do
         Cave.Grid[y] = {}
         for x = -caveSize, caveSize do
@@ -68,9 +66,9 @@ function Cave.setBlock(x, y, BlockType)
 end
 
 function Cave.load()
-    generateCave(WORLD_SIZE)
-    addWalls(WORLD_SIZE)
-    addOres(WORLD_SIZE)
+    generateCave(Cave.Size)
+    addWalls(Cave.Size)
+    addOres(Cave.Size)
 end
 
 ---@param dt number
@@ -81,8 +79,8 @@ end
 function Cave.draw(l, t, w, h)
     local r, b = l + w, t + h
     love.graphics.setColor(1, 1, 1, 1)
-    for y = -WORLD_SIZE, WORLD_SIZE - 1 do
-        for x = -WORLD_SIZE, WORLD_SIZE - 1 do
+    for y = -Cave.Size, Cave.Size - 1 do
+        for x = -Cave.Size, Cave.Size - 1 do
             if Cave.Grid[x][y] ~= BlockType.Air then
                 if x > math.floor(l / Global.unitSize) - 1 and x < math.floor(r / Global.unitSize) + 1
                 and y > math.floor(t / Global.unitSize) - 1 and y < math.floor(b / Global.unitSize) + 1 then

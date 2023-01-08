@@ -33,7 +33,6 @@ local function PlayerInventory(w, h)
 end
 
 local function CraftingMenu(w, h)
-    local craftingFont = font(24)
     if Player.crafting then
         UI.nuklear:frameBegin()
         UI.nuklear:windowBegin('Crafting', (w / 2) - (w / 4), (h / 2) - (h / 4), w / 2, h / 2, 'border', 'title')
@@ -70,6 +69,8 @@ local function PlayerHealth()
     love.graphics.setLineWidth(lw)
     love.graphics.rectangle("line", Global.unitSize + (lw / 2), Global.unitSize + (lw / 2), (Player.maxHp * Global.unitSize) - (lw / 1), Global.unitSize - (lw / 1))
     love.graphics.setLineWidth(1)
+    love.graphics.setFont(font(28))
+    love.graphics.print(tostring(Player.hp), 32 * Player.hp + font(28):getWidth(tostring(Player.hp)) / 2, 32)
 end
 
 function UI.update(w, h)

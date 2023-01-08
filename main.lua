@@ -1,6 +1,7 @@
 local Player = require("lua.Player")
 local Cave = require("lua.Cave")
 local UI = require("lua.UI")
+local Enemies = require("lua.Enemies")
 
 local WIDTH, HEIGHT = 1280, 720
 
@@ -9,7 +10,7 @@ local Camera = require("lua.Camera")
 
 ---@type love.load
 function love.load()
-	love.window.setMode(WIDTH, HEIGHT, {resizable = true, minwidth = 512, minheight = 288})
+	love.window.setMode(WIDTH, HEIGHT, { resizable = true, minwidth = 512, minheight = 288 })
 	love.graphics.setBackgroundColor(1 / 3, 1 / 3, 1 / 3, 1)
 
 	Camera.cam = gamera.new(
@@ -36,6 +37,7 @@ function love.update(dt)
 
 	Cave.update(dt)
 	Player.update(dt)
+	-- Enemies.update(dt)
 	Camera.cam:setPosition(Player.x + (Player.size / 2), Player.y + (Player.size / 2))
 	Camera.cam:setWindow(0, 0, WIDTH, HEIGHT)
 	UI.update(WIDTH, HEIGHT)
@@ -45,6 +47,7 @@ end
 function love.draw()
 	Camera.cam:draw(function(l, t, w, h)
 		Cave.draw(l, t, w, h)
+		-- Enemies.draw()
 		Player.draw()
 	end)
 	UI.draw(WIDTH, HEIGHT)
@@ -109,4 +112,13 @@ end
 ---@return number
 function math.dist(x1, y1, x2, y2)
 	return ((x2 - x1) ^ 2 + (y2 - y1) ^ 2) ^ 0.5
+end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@return number
+function math.angle(x1, y1, x2, y2)
+	return math.atan2(y2 - y1, x2 - x1)
 end
