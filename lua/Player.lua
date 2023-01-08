@@ -1,6 +1,7 @@
 local Global = require("lua.GlobalValues")
 local Cave = require("lua.Cave")
 local Camera = require("lua.Camera")
+local BlockType = require("lua.BlockType")
 
 local Player = {
     x = 0, ---@type number
@@ -30,16 +31,16 @@ local Player = {
 ---@param clearance number
 local function Movement(dt, clearance)
     if not Player.crafting then
-        if love.keyboard.isDown("w") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] == 0 then
+        if love.keyboard.isDown("w") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] == BlockType.Air then
             Player.y = Player.y - Player.speed * dt
         end
-        if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == 0 then
+        if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == BlockType.Air then
             Player.x = Player.x - Player.speed * dt
         end
-        if love.keyboard.isDown("s") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y + Player.size + clearance) / Global.unitSize)] == 0 then
+        if love.keyboard.isDown("s") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y + Player.size + clearance) / Global.unitSize)] == BlockType.Air then
             Player.y = Player.y + Player.speed * dt
         end
-        if love.keyboard.isDown("d") and Cave.Grid[math.floor((Player.x + Player.size + clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == 0 then
+        if love.keyboard.isDown("d") and Cave.Grid[math.floor((Player.x + Player.size + clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == BlockType.Air then
             Player.x = Player.x + Player.speed * dt
         end
     end
@@ -54,10 +55,10 @@ local function Mine(range)
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range then
             local block = Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)]
 
-            if block == 2 and Player.stoneUpgrade == 0 then return end
-            if block == 3 and Player.ironUpgrade == 0 then return end
-            if block > 0 then
-                Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)] = 0
+            if block == BlockType.Iron and Player.stoneUpgrade == 0 then return end
+            if block == BlockType.Gold and Player.ironUpgrade == 0 then return end
+            if block > BlockType.Air and Player.inventory[block] < 100 then
+                Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
                 Player.inventory[block] = Player.inventory[block] + 1
             end
         end
@@ -71,9 +72,9 @@ local function Build(range)
     if love.mouse.isDown(2) then
         if math.abs(math.floor(wmx / Global.unitSize) - math.floor(Player.x / Global.unitSize)) <= range
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range
-        and Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)] == 0 then
+        and Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)] == BlockType.Air then
             if Player.inventory[Player.selectedItem] > 0 then
-                Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)] = Player.selectedItem
+                Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), Player.selectedItem)
                 Player.inventory[Player.selectedItem] = Player.inventory[Player.selectedItem] - 1
             end
         end
