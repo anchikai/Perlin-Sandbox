@@ -36,16 +36,16 @@ local Player = {
 ---@param clearance number
 local function Movement(dt, clearance)
     if not Player.crafting then
-        if love.keyboard.isDown("w")and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] ~= BlockType.Stone then
+        if love.keyboard.isDown("w")and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] ~= BlockType.Air then
             Player.y = Player.y - Player.speed * dt
         end
-        if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] ~= BlockType.Stone then
+        if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == BlockType.Air then
             Player.x = Player.x - Player.speed * dt
         end
-        if love.keyboard.isDown("s") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y + Player.size + clearance) / Global.unitSize)] ~= BlockType.Stone then
+        if love.keyboard.isDown("s") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y + Player.size + clearance) / Global.unitSize)] == BlockType.Air then
             Player.y = Player.y + Player.speed * dt
         end
-        if love.keyboard.isDown("d") and Cave.Grid[math.floor((Player.x + Player.size + clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] ~= BlockType.Stone then
+        if love.keyboard.isDown("d") and Cave.Grid[math.floor((Player.x + Player.size + clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == BlockType.Air then
             Player.x = Player.x + Player.speed * dt
         end
     end
