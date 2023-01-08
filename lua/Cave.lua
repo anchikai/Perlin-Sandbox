@@ -1,10 +1,11 @@
 local Global = require("lua.GlobalValues")
+local Camera = require("lua.Camera")
 
 local Cave = {
     Grid = {}
 }
 
-local WORLD_SIZE = 64 ---@type number
+local WORLD_SIZE = 128 ---@type number
 WORLD_SIZE = WORLD_SIZE + 1
 
 ---@param x number
@@ -43,11 +44,14 @@ local function addOres(caveSize)
     for y = -caveSize, caveSize - 1 do
         for x = -caveSize, caveSize - 1 do
             if Cave.Grid[x][y] == 1 then
-                if love.math.random() <= 0.01 then -- Iron
-                    Cave.Grid[x][y] = 2
-                end
-                if love.math.random() <= 0.005 then -- Gold
-                    Cave.Grid[x][y] = 3
+                if Cave.Grid[x - 1][y] ~= 0 and Cave.Grid[x + 1][y] ~= 0
+                and Cave.Grid[x][y - 1] ~= 0 and Cave.Grid[x][y + 1] ~= 0 then
+                    if love.math.random() <= 0.02 then -- Iron
+                        Cave.Grid[x][y] = 2
+                    end
+                    if love.math.random() <= 0.005 then -- Gold
+                        Cave.Grid[x][y] = 3
+                    end
                 end
             end
         end
@@ -66,16 +70,31 @@ function Cave.update(dt)
 end
 
 function Cave.draw()
+    local playerX, playerY = Camera.cam:getPosition()
+    local gpx, gpy = math.floor(playerX / Global.unitSize), math.floor(playerY / Global.unitSize)
+
     for y = -WORLD_SIZE, WORLD_SIZE - 1 do
         for x = -WORLD_SIZE, WORLD_SIZE - 1 do
             if Cave.Grid[x][y] == 1 then
                 love.graphics.setColor(0.2, 0.2, 0.2, 1)
                 love.graphics.rectangle("fill", x * Global.unitSize, y * Global.unitSize, Global.unitSize, Global.unitSize)
             elseif Cave.Grid[x][y] == 2 then
-                love.graphics.setColor(0.894, 0.769, 0.588, 1)
+                if (Cave.Grid[x - 1][y] == 0 or Cave.Grid[x + 1][y] == 0
+                or Cave.Grid[x][y - 1] == 0 or Cave.Grid[x][y + 1] == 0)
+                or math.dist(math.floor(playerX / Global.unitSize), math.floor(playerY / Global.unitSize), x, y) <= 3 then
+                    love.graphics.setColor(0.894, 0.769, 0.588, 1)
+                else
+                    love.graphics.setColor(0.2, 0.2, 0.2, 1)
+                end
                 love.graphics.rectangle("fill", x * Global.unitSize, y * Global.unitSize, Global.unitSize, Global.unitSize)
             elseif Cave.Grid[x][y] == 3 then
-                love.graphics.setColor(1, 1, 0.33, 1)
+                if (Cave.Grid[x - 1][y] == 0 or Cave.Grid[x + 1][y] == 0
+                or Cave.Grid[x][y - 1] == 0 or Cave.Grid[x][y + 1] == 0)
+                or math.dist(math.floor(playerX / Global.unitSize), math.floor(playerY / Global.unitSize), x, y) <= 3 then
+                    love.graphics.setColor(1, 1, 0.33, 1)
+                else
+                    love.graphics.setColor(0.2, 0.2, 0.2, 1)
+                end
                 love.graphics.rectangle("fill", x * Global.unitSize, y * Global.unitSize, Global.unitSize, Global.unitSize)
             elseif Cave.Grid[x][y] == -1 then
                 love.graphics.setColor(0, 0, 0, 1)

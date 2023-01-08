@@ -10,8 +10,9 @@ local Player = {
     size = 32, ---@type number
     range = 3, ---@type number
 
-    ironUpgrade = false, ---@type boolean
-    goldUpgrade = false, ---@type boolean
+    stoneUpgrade = 0, ---@type number
+    ironUpgrade = 0, ---@type number
+    goldUpgrade = 0, ---@type number
 
     inventory = {
         0, -- Stone
@@ -21,23 +22,26 @@ local Player = {
         0,
         0,
     },
-    selectedItem = 1
+    selectedItem = 1, ---@type number
+    crafting = false, ---@type boolean
 }
 
 ---@param dt number
 ---@param clearance number
 local function Movement(dt, clearance)
-    if love.keyboard.isDown("w") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] == 0 then
-        Player.y = Player.y - Player.speed * dt
-    end
-    if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == 0 then
-        Player.x = Player.x - Player.speed * dt
-    end
-    if love.keyboard.isDown("s") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y + Player.size + clearance) / Global.unitSize)] == 0 then
-        Player.y = Player.y + Player.speed * dt
-    end
-    if love.keyboard.isDown("d") and Cave.Grid[math.floor((Player.x + Player.size + clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == 0 then
-        Player.x = Player.x + Player.speed * dt
+    if not Player.crafting then
+        if love.keyboard.isDown("w") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] == 0 then
+            Player.y = Player.y - Player.speed * dt
+        end
+        if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == 0 then
+            Player.x = Player.x - Player.speed * dt
+        end
+        if love.keyboard.isDown("s") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y + Player.size + clearance) / Global.unitSize)] == 0 then
+            Player.y = Player.y + Player.speed * dt
+        end
+        if love.keyboard.isDown("d") and Cave.Grid[math.floor((Player.x + Player.size + clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == 0 then
+            Player.x = Player.x + Player.speed * dt
+        end
     end
 end
 
@@ -49,6 +53,9 @@ local function Mine(range)
         if math.abs(math.floor(wmx / Global.unitSize) - math.floor(Player.x / Global.unitSize)) <= range
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range then
             local block = Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)]
+
+            if block == 2 and Player.stoneUpgrade == 0 then return end
+            if block == 3 and Player.ironUpgrade == 0 then return end
             if block > 0 then
                 Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)] = 0
                 Player.inventory[block] = Player.inventory[block] + 1
@@ -84,12 +91,9 @@ local function PlayerGridCursor(range)
     end
 end
 
-function love.wheelmoved(x, y)
-    if y > 0 and Player.selectedItem > 1 then
-        Player.selectedItem = Player.selectedItem - 1
-    elseif y < 0 and Player.selectedItem < #Player.inventory then
-        Player.selectedItem = Player.selectedItem + 1
-    end
+---@param defaultRange number
+local function updateRange(defaultRange)
+    Player.range = defaultRange + Player.stoneUpgrade + Player.ironUpgrade + Player.goldUpgrade
 end
 
 function Player.load()
@@ -99,6 +103,7 @@ end
 ---@param dt number
 function Player.update(dt)
     Movement(dt, 2)
+    updateRange(3)
     Mine(Player.range)
     Build(Player.range)
 end

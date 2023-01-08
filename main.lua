@@ -10,7 +10,7 @@ local Camera = require("lua.Camera")
 ---@type love.load
 function love.load()
 	love.window.setMode(WIDTH, HEIGHT)
-	love.graphics.setBackgroundColor(1/3, 1/3, 1/3, 1)
+	love.graphics.setBackgroundColor(1 / 3, 1 / 3, 1 / 3, 1)
 
 	Camera.cam = gamera.new(
 		0,
@@ -35,6 +35,7 @@ function love.update(dt)
 	Cave.update(dt)
 	Player.update(dt)
 	Camera.cam:setPosition(Player.x + (Player.size / 2), Player.y + (Player.size / 2))
+	UI.update(WIDTH, HEIGHT)
 end
 
 ---@type love.draw
@@ -46,10 +47,57 @@ function love.draw()
 	UI.draw(WIDTH, HEIGHT)
 end
 
----@type love.keypressed
 function love.keypressed(key, scancode, isrepeat)
-	if key == "r" then
-		Cave.Grid = {}
-        Cave.load()
+	UI.nuklear:keypressed(key, scancode, isrepeat)
+
+	if key == "e" or (key == "escape" and Player.crafting) then
+		Player.crafting = not Player.crafting
 	end
+end
+
+---@type love.keyreleased
+function love.keyreleased(key, scancode)
+	UI.nuklear:keyreleased(key, scancode)
+end
+
+---@type love.mousepressed
+function love.mousepressed(x, y, button, istouch, presses)
+	UI.nuklear:mousepressed(x, y, button, istouch, presses)
+end
+
+---@type love.mousereleased
+function love.mousereleased(x, y, button, istouch, presses)
+	UI.nuklear:mousereleased(x, y, button, istouch, presses)
+end
+
+---@type love.mousemoved
+function love.mousemoved(x, y, dx, dy, istouch)
+	UI.nuklear:mousemoved(x, y, dx, dy, istouch)
+end
+
+---@type love.textinput
+function love.textinput(text)
+	UI.nuklear:textinput(text)
+end
+
+---@type love.wheelmoved
+function love.wheelmoved(x, y)
+	UI.nuklear:wheelmoved(x, y)
+
+	if not Player.crafting then
+		if y > 0 and Player.selectedItem > 1 then
+			Player.selectedItem = Player.selectedItem - 1
+		elseif y < 0 and Player.selectedItem < #Player.inventory then
+			Player.selectedItem = Player.selectedItem + 1
+		end
+	end
+end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@return number
+function math.dist(x1, y1, x2, y2)
+	return ((x2 - x1) ^ 2 + (y2 - y1) ^ 2) ^ 0.5
 end
