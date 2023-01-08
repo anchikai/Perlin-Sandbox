@@ -1,6 +1,6 @@
 local Assets = {
     gfx = {
-        Blocks = love.graphics.newImage("Assets/gfx/game/Block.png"),
+        Blocks = love.graphics.newImage("Assets/gfx/game/block.png"),
         BlockTypes = {
             love.graphics.newQuad(0, 0, 32, 32, 224, 32),
             love.graphics.newQuad(32, 0, 32, 32, 224, 32),
@@ -12,7 +12,7 @@ local Assets = {
         }
     },
     sfx = {
-
+        Stone = love.audio.newSource("Assets/sfx/game/block/stone.wav", "static"),
     }
 }
 

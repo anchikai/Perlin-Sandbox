@@ -9,14 +9,14 @@ local Camera = require("lua.Camera")
 
 ---@type love.load
 function love.load()
-	love.window.setMode(WIDTH, HEIGHT)
+	love.window.setMode(WIDTH, HEIGHT, {resizable = true, minwidth = 512, minheight = 288})
 	love.graphics.setBackgroundColor(1 / 3, 1 / 3, 1 / 3, 1)
 
 	Camera.cam = gamera.new(
 		0,
 		0,
-		WIDTH,
-		HEIGHT
+		1920,
+		1080
 	)
 
 	Camera.cam:setWorld(
@@ -32,9 +32,12 @@ end
 
 ---@type love.update
 function love.update(dt)
+	WIDTH, HEIGHT = love.graphics.getDimensions()
+
 	Cave.update(dt)
 	Player.update(dt)
 	Camera.cam:setPosition(Player.x + (Player.size / 2), Player.y + (Player.size / 2))
+	Camera.cam:setWindow(0, 0, WIDTH, HEIGHT)
 	UI.update(WIDTH, HEIGHT)
 end
 

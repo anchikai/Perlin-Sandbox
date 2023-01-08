@@ -2,6 +2,7 @@ local Global = require("lua.GlobalValues")
 local Cave = require("lua.Cave")
 local Camera = require("lua.Camera")
 local BlockType = require("lua.BlockType")
+local Assets    = require("lua.Assets")
 
 local Player = {
     x = 0, ---@type number
@@ -51,7 +52,7 @@ end
 local function Mine(range)
     local mx, my = love.mouse.getPosition()
     local wmx, wmy = Camera.cam:toWorld(mx, my)
-    if love.mouse.isDown(1) then
+    if love.mouse.isDown(1) and not Player.crafting then
         if math.abs(math.floor(wmx / Global.unitSize) - math.floor(Player.x / Global.unitSize)) <= range
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range then
             local block = Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)]
@@ -61,6 +62,8 @@ local function Mine(range)
             if block > BlockType.Air and Player.inventory[block] < 100 then
                 Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
                 Player.inventory[block] = Player.inventory[block] + 1
+                Assets.sfx.Stone:stop()
+                Assets.sfx.Stone:play()
             end
         end
     end
@@ -70,13 +73,15 @@ end
 local function Build(range)
     local mx, my = love.mouse.getPosition()
     local wmx, wmy = Camera.cam:toWorld(mx, my)
-    if love.mouse.isDown(2) then
+    if love.mouse.isDown(2) and not Player.crafting then
         if math.abs(math.floor(wmx / Global.unitSize) - math.floor(Player.x / Global.unitSize)) <= range
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range
         and Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)] == BlockType.Air then
             if Player.inventory[Player.selectedItem] > 0 then
                 Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), Player.selectedItem)
                 Player.inventory[Player.selectedItem] = Player.inventory[Player.selectedItem] - 1
+                Assets.sfx.Stone:stop()
+                Assets.sfx.Stone:play()
             end
         end
     end
