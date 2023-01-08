@@ -1,5 +1,6 @@
 local Player = require("lua.Player")
 local Global = require("lua.GlobalValues")
+local Assets = require("lua.Assets")
 
 local UI = {
     nuklear = require("nuklear").newUI()
@@ -25,6 +26,10 @@ local function PlayerInventory(w, h)
     -- Selected Item
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.rectangle("line", (w / 2) + ((Player.selectedItem - 1) * 64) - ((#Player.inventory * 64) / 2), h - 64, 64, 64)
+
+    for i = 1, #Player.inventory do
+        love.graphics.draw(Assets.gfx.Blocks, Assets.gfx.BlockTypes[i + 2], (w / 2) + (i * 64) - ((#Player.inventory * 64) / 2) - 48, h - 48)
+    end
 end
 
 local function CraftingMenu(w, h)

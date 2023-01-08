@@ -21,8 +21,8 @@ local Player = {
         0, -- Stone
         0, -- Iron
         0, -- Gold
-        0,
-        0,
+        0, -- Diamond
+        0, -- Ruby
     },
     selectedItem = 1, ---@type number
     crafting = false, ---@type boolean

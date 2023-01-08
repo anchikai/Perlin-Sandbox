@@ -1,12 +1,13 @@
 local Global = require("lua.GlobalValues")
 local Camera = require("lua.Camera")
 local BlockType = require("lua.BlockType")
+local Assets    = require("lua.Assets")
 
 local Cave = {
     Grid = {}
 }
 
-local WORLD_SIZE = 128 ---@type number
+local WORLD_SIZE = 256 ---@type number
 WORLD_SIZE = WORLD_SIZE + 1
 
 ---@param x number
@@ -77,22 +78,16 @@ function Cave.update(dt)
     
 end
 
-function Cave.draw()
+function Cave.draw(l, t, w, h)
+    local r, b = l + w, t + h
+    love.graphics.setColor(1, 1, 1, 1)
     for y = -WORLD_SIZE, WORLD_SIZE - 1 do
         for x = -WORLD_SIZE, WORLD_SIZE - 1 do
-            local r, g, b, a = 1, 1, 1, 1
-            if Cave.Grid[x][y] == BlockType.WorldBorder then
-                r, g, b, a = 0, 0, 0, 1
-            elseif Cave.Grid[x][y] == BlockType.Stone then
-                r, g, b, a = 0.2, 0.2, 0.2, 1
-            elseif Cave.Grid[x][y] == BlockType.Iron then
-                r, g, b, a = 0.894, 0.769, 0.588, 1
-            elseif Cave.Grid[x][y] == BlockType.Gold then
-                r, g, b, a = 1, 1, 0.33, 1
-            end
             if Cave.Grid[x][y] ~= BlockType.Air then
-                love.graphics.setColor(r, g, b, a)
-                love.graphics.rectangle("fill", x * Global.unitSize, y * Global.unitSize, Global.unitSize, Global.unitSize)
+                if x > math.floor(l / Global.unitSize) - 1 and x < math.floor(r / Global.unitSize) + 1
+                and y > math.floor(t / Global.unitSize) - 1 and y < math.floor(b / Global.unitSize) + 1 then
+                    love.graphics.draw(Assets.gfx.Blocks, Assets.gfx.BlockTypes[Cave.Grid[x][y] + 2], x * Global.unitSize, y * Global.unitSize)
+                end
             end
         end
     end

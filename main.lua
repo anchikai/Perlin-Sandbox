@@ -41,7 +41,7 @@ end
 ---@type love.draw
 function love.draw()
 	Camera.cam:draw(function(l, t, w, h)
-		Cave.draw()
+		Cave.draw(l, t, w, h)
 		Player.draw()
 	end)
 	UI.draw(WIDTH, HEIGHT)
