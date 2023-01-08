@@ -10,6 +10,8 @@ local Player = {
     speed = 256, ---@type number
     size = 32, ---@type number
     range = 3, ---@type number
+    hp = 5, ---@type number
+    maxHp = 5, ---@type number
 
     stoneUpgrade = 0, ---@type number
     ironUpgrade = 0, ---@type number
@@ -19,7 +21,6 @@ local Player = {
         0, -- Stone
         0, -- Iron
         0, -- Gold
-        0,
         0,
         0,
     },

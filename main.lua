@@ -53,6 +53,12 @@ function love.keypressed(key, scancode, isrepeat)
 	if key == "e" or (key == "escape" and Player.crafting) then
 		Player.crafting = not Player.crafting
 	end
+
+	for i = 1, #Player.inventory do
+		if key == tostring(i) then
+			Player.selectedItem = i
+		end
+	end
 end
 
 ---@type love.keyreleased

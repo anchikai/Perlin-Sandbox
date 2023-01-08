@@ -1,4 +1,5 @@
 local Player = require("lua.Player")
+local Global = require("lua.GlobalValues")
 
 local UI = {
     nuklear = require("nuklear").newUI()
@@ -56,12 +57,23 @@ local function CraftingMenu(w, h)
     end
 end
 
+local function PlayerHealth()
+    love.graphics.setColor(1, 0, 0, 1)
+    love.graphics.rectangle("fill", Global.unitSize, Global.unitSize, Player.hp * Global.unitSize, Global.unitSize)
+    love.graphics.setColor(0, 0, 0, 0.5)
+    local lw = 8
+    love.graphics.setLineWidth(lw)
+    love.graphics.rectangle("line", Global.unitSize + (lw / 2), Global.unitSize + (lw / 2), (Player.maxHp * Global.unitSize) - (lw / 1), Global.unitSize - (lw / 1))
+    love.graphics.setLineWidth(1)
+end
+
 function UI.update(w, h)
     CraftingMenu(w, h)
 end
 
 function UI.draw(w, h)
     PlayerInventory(w, h)
+    PlayerHealth()
     UI.nuklear:draw()
 end
 
