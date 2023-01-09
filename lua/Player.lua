@@ -131,6 +131,8 @@ function Player.load()
     for i = 1, Player.inventorySize do
         table.insert(Player.inventory, i, {Type = BlockType.Air, Amount = 0})
     end
+    Player.x = math.floor((Cave.Size / 2)) * Global.unitSize
+    Player.y = math.floor((Cave.Size / 2)) * Global.unitSize
 end
 
 ---@param dt number

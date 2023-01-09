@@ -4,7 +4,7 @@ local Assets = require("lua.Assets")
 
 local Cave = {
     Grid = {},
-    Size = 1 + 256
+    Size = 256
 }
 
 ---@param x number
@@ -19,9 +19,9 @@ local function generateCave(caveSize)
     local baseY = 10000 * love.math.random()
 
     -- Stone
-    for y = -caveSize, caveSize do
+    for y = 1, caveSize do
         Cave.Grid[y] = {}
-        for x = -caveSize, caveSize do
+        for x = 1, caveSize do
             Cave.Grid[y][x] = round(love.math.noise(baseX + 0.1 * x, baseY + 0.1 * y))
         end
     end
@@ -29,23 +29,23 @@ end
 
 ---@param caveSize number
 local function addWalls(caveSize)
-    for y = -caveSize, caveSize - 1 do
-        for x = -caveSize, caveSize - 1 do
-            Cave.Grid[-caveSize][x] = BlockType.WorldBorder
-            Cave.Grid[y][-caveSize] = BlockType.WorldBorder
-            Cave.Grid[x][caveSize - 1] = BlockType.WorldBorder
-            Cave.Grid[caveSize - 1][y] = BlockType.WorldBorder
+    for y = 1, caveSize do
+        for x = 1, caveSize do
+            Cave.Grid[1][x] = BlockType.WorldBorder
+            Cave.Grid[y][1] = BlockType.WorldBorder
+            Cave.Grid[x][caveSize] = BlockType.WorldBorder
+            Cave.Grid[caveSize][y] = BlockType.WorldBorder
         end
     end
 end
 
 ---@param caveSize number
 local function addOres(caveSize)
-    for y = -caveSize, caveSize - 1 do
-        for x = -caveSize, caveSize - 1 do
+    for y = 1, caveSize do
+        for x = 1, caveSize do
             if Cave.Grid[x][y] == 1 then
-                if Cave.Grid[x - 1][y] ~= BlockType.Air and Cave.Grid[x + 1][y] ~= BlockType.Air
-                and Cave.Grid[x][y - 1] ~= BlockType.Air and Cave.Grid[x][y + 1] ~= BlockType.Air then
+                if Cave.Grid[x][y] ~= BlockType.Air and Cave.Grid[x][y] ~= BlockType.Air
+                and Cave.Grid[x][y] ~= BlockType.Air and Cave.Grid[x][y] ~= BlockType.Air then
                     if love.math.random() <= 0.02 then
                         Cave.Grid[x][y] = BlockType.Iron
                     end
@@ -79,8 +79,8 @@ end
 function Cave.draw(l, t, w, h)
     local r, b = l + w, t + h
     love.graphics.setColor(1, 1, 1, 1)
-    for y = -Cave.Size, Cave.Size - 1 do
-        for x = -Cave.Size, Cave.Size - 1 do
+    for y = 1, Cave.Size do
+        for x = 1, Cave.Size do
             if Cave.Grid[x][y] ~= BlockType.Air then
                 if x > math.floor(l / Global.unitSize) - 1 and x < math.floor(r / Global.unitSize) + 1
                 and y > math.floor(t / Global.unitSize) - 1 and y < math.floor(b / Global.unitSize) + 1 then
