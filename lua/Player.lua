@@ -31,7 +31,7 @@ local Player = {
 ---@param clearance number
 local function Movement(dt, clearance)
     if not Player.crafting then
-        if love.keyboard.isDown("w")and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] == BlockType.Air then
+        if love.keyboard.isDown("w") and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] == BlockType.Air then
             Player.y = Player.y - Player.speed * dt
         end
         if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == BlockType.Air then
@@ -60,26 +60,25 @@ local function Mine(range)
             if block == BlockType.Gold and Player.ironUpgrade == 0 then return end
             local foundType = false
             for i = 1, Player.inventorySize do
-                if Player.inventory[i].Amount < 256 then
-                    if Player.inventory[i].Type == block then
-                        Player.inventory[i].Amount = Player.inventory[i].Amount + 1
-                        foundType = true
-                        break
-                    end
+                if Player.inventory[i].Amount < 256 and Player.inventory[i].Type == block then
+                    Player.inventory[i].Amount = Player.inventory[i].Amount + 1
+                    foundType = true
+                    Assets.sfx.Stone:stop()
+                    Assets.sfx.Stone:play()
+                    Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
+                    break
                 end
             end
             for i = 1, Player.inventorySize do -- Idk why the fuck this doesn't work if I don't put the below in the above for loop
-                if Player.inventory[i].Amount < 256 then
-                    if Player.inventory[i].Type == BlockType.Air and not foundType then
-                        Player.inventory[i].Type = block
-                        Player.inventory[i].Amount = Player.inventory[i].Amount + 1
-                        break
-                    end
+                if Player.inventory[i].Amount < 256 and Player.inventory[i].Type == BlockType.Air and not foundType then
+                    Player.inventory[i].Type = block
+                    Player.inventory[i].Amount = Player.inventory[i].Amount + 1
+                    Assets.sfx.Stone:stop()
+                    Assets.sfx.Stone:play()
+                    Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
+                    break
                 end
             end
-            Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
-            Assets.sfx.Stone:stop()
-            Assets.sfx.Stone:play()
         end
     end
 end
