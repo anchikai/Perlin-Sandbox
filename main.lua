@@ -60,7 +60,7 @@ function love.keypressed(key, scancode, isrepeat)
 		Player.crafting = not Player.crafting
 	end
 
-	for i = 1, #Player.inventory do
+	for i = 1, Player.inventorySize do
 		if key == tostring(i) then
 			Player.selectedItem = i
 		end
@@ -99,7 +99,7 @@ function love.wheelmoved(x, y)
 	if not Player.crafting then
 		if y > 0 and Player.selectedItem > 1 then
 			Player.selectedItem = Player.selectedItem - 1
-		elseif y < 0 and Player.selectedItem < #Player.inventory then
+		elseif y < 0 and Player.selectedItem < Player.inventorySize then
 			Player.selectedItem = Player.selectedItem + 1
 		end
 	end

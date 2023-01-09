@@ -8,4 +8,5 @@ A basic top-down sandbox game made in Love2D.
 - [ ] Add zones
 - [ ] Make the game more akin to a roguelike
 - [ ] Add better mining/building
-- [ ] Add better inventory and crafting systems
+- [x] Add better inventory system
+- [ ] Add better crafting system

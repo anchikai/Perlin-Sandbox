@@ -2,7 +2,7 @@ local Global = require("lua.GlobalValues")
 local Cave = require("lua.Cave")
 local Camera = require("lua.Camera")
 local BlockType = require("lua.BlockType")
-local Assets    = require("lua.Assets")
+local Assets = require("lua.Assets")
 
 local Player = {
     x = 0, ---@type number
@@ -21,13 +21,8 @@ local Player = {
     ironUpgrade = 0, ---@type number
     goldUpgrade = 0, ---@type number
 
-    inventory = {
-        0, -- Stone
-        0, -- Iron
-        0, -- Gold
-        0, -- Diamond
-        0, -- Ruby
-    },
+    inventory = {},
+    inventorySize = 5, ---@type number
     selectedItem = 1, ---@type number
     crafting = false, ---@type boolean
 }
@@ -36,7 +31,7 @@ local Player = {
 ---@param clearance number
 local function Movement(dt, clearance)
     if not Player.crafting then
-        if love.keyboard.isDown("w")and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] ~= BlockType.Air then
+        if love.keyboard.isDown("w")and Cave.Grid[math.floor((Player.x + (Player.size / 2)) / Global.unitSize)][math.floor((Player.y - clearance) / Global.unitSize)] == BlockType.Air then
             Player.y = Player.y - Player.speed * dt
         end
         if love.keyboard.isDown("a") and Cave.Grid[math.floor((Player.x - clearance) / Global.unitSize)][math.floor((Player.y + (Player.size / 2)) / Global.unitSize)] == BlockType.Air then
@@ -60,14 +55,31 @@ local function Mine(range)
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range then
             local block = Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)]
 
+            if block == BlockType.Air then return end
             if block == BlockType.Iron and Player.stoneUpgrade == 0 then return end
             if block == BlockType.Gold and Player.ironUpgrade == 0 then return end
-            if block > BlockType.Air and Player.inventory[block] < 100 then
-                Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
-                Player.inventory[block] = Player.inventory[block] + 1
-                Assets.sfx.Stone:stop()
-                Assets.sfx.Stone:play()
+            local foundType = false
+            for i = 1, Player.inventorySize do
+                if Player.inventory[i].Amount < 256 then
+                    if Player.inventory[i].Type == block then
+                        Player.inventory[i].Amount = Player.inventory[i].Amount + 1
+                        foundType = true
+                        break
+                    end
+                end
             end
+            for i = 1, Player.inventorySize do -- Idk why the fuck this doesn't work if I don't put the below in the above for loop
+                if Player.inventory[i].Amount < 256 then
+                    if Player.inventory[i].Type == BlockType.Air and not foundType then
+                        Player.inventory[i].Type = block
+                        Player.inventory[i].Amount = Player.inventory[i].Amount + 1
+                        break
+                    end
+                end
+            end
+            Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
+            Assets.sfx.Stone:stop()
+            Assets.sfx.Stone:play()
         end
     end
 end
@@ -80,9 +92,9 @@ local function Build(range)
         if math.abs(math.floor(wmx / Global.unitSize) - math.floor(Player.x / Global.unitSize)) <= range
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range
         and Cave.Grid[math.floor(wmx / Global.unitSize)][math.floor(wmy / Global.unitSize)] == BlockType.Air then
-            if Player.inventory[Player.selectedItem] > 0 then
-                Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), Player.selectedItem)
-                Player.inventory[Player.selectedItem] = Player.inventory[Player.selectedItem] - 1
+            if Player.inventory[Player.selectedItem].Amount > 0 then
+                Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), Player.inventory[Player.selectedItem].Type)
+                Player.inventory[Player.selectedItem].Amount = Player.inventory[Player.selectedItem].Amount - 1
                 Assets.sfx.Stone:stop()
                 Assets.sfx.Stone:play()
             end
@@ -106,14 +118,27 @@ local function updateRange(defaultRange)
     Player.range = defaultRange + Player.stoneUpgrade + Player.ironUpgrade + Player.goldUpgrade
 end
 
-function Player.load()
+local function updateInventory()
+    for i = 1, Player.inventorySize do
+        -- If the stack is empty, make sure its type isn't set to an actual block
+        -- This is to make sure the items in the inventory can be added/removed dynamically and that slot doesn't break in some way that I'm not capable of conceiving
+        if Player.inventory[i].Amount == 0 and Player.inventory[i].Type ~= BlockType.Air then
+            Player.inventory[i].Type = BlockType.Air
+        end
+    end
+end
 
+function Player.load()
+    for i = 1, Player.inventorySize do
+        table.insert(Player.inventory, i, {Type = BlockType.Air, Amount = 0})
+    end
 end
 
 ---@param dt number
 function Player.update(dt)
     Movement(dt, 2)
     updateRange(3)
+    updateInventory()
     Mine(Player.range)
     Build(Player.range)
 end
