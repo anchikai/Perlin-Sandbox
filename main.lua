@@ -2,6 +2,8 @@ local Player = require("lua.Player")
 local Cave = require("lua.Cave")
 local UI = require("lua.UI")
 local Enemies = require("lua.Enemies")
+local Assets  = require("lua.Assets")
+local Global = require("lua.GlobalValues")
 
 local WIDTH, HEIGHT = 1280, 720
 
@@ -12,6 +14,7 @@ local Camera = require("lua.Camera")
 function love.load()
 	love.window.setMode(WIDTH, HEIGHT, { resizable = true, minwidth = 512, minheight = 288 })
 	love.graphics.setBackgroundColor(1 / 3, 1 / 3, 1 / 3, 1)
+	love.window.setTitle("Roguebox")
 
 	Camera.cam = gamera.new(
 		0,
@@ -27,8 +30,10 @@ function love.load()
 		math.huge
 	)
 
+	Assets.load()
 	Cave.load()
 	Player.load()
+	Enemies.load()
 end
 
 ---@type love.update
@@ -37,7 +42,7 @@ function love.update(dt)
 
 	Cave.update(dt)
 	Player.update(dt)
-	-- Enemies.update(dt)
+	Enemies.update(dt)
 	Camera.cam:setPosition(Player.x + (Player.size / 2), Player.y + (Player.size / 2))
 	Camera.cam:setWindow(0, 0, WIDTH, HEIGHT)
 	UI.update(WIDTH, HEIGHT)
@@ -47,7 +52,7 @@ end
 function love.draw()
 	Camera.cam:draw(function(l, t, w, h)
 		Cave.draw(l, t, w, h)
-		-- Enemies.draw()
+		Enemies.draw()
 		Player.draw()
 	end)
 	UI.draw(WIDTH, HEIGHT)
@@ -63,6 +68,16 @@ function love.keypressed(key, scancode, isrepeat)
 	for i = 1, Player.inventorySize do
 		if key == tostring(i) then
 			Player.selectedItem = i
+		end
+	end
+
+	if key == "f3" then
+		Global.debugMenu = not Global.debugMenu
+	end
+
+	if Global.debugMenu then
+		if key == "k" then
+			Enemies.enemies = {}
 		end
 	end
 end
@@ -96,11 +111,20 @@ end
 function love.wheelmoved(x, y)
 	UI.nuklear:wheelmoved(x, y)
 
-	if not Player.crafting then
+	if not Player.crafting and not love.keyboard.isDown("lctrl") then
 		if y > 0 and Player.selectedItem > 1 then
 			Player.selectedItem = Player.selectedItem - 1
 		elseif y < 0 and Player.selectedItem < Player.inventorySize then
 			Player.selectedItem = Player.selectedItem + 1
+		end
+	end
+	if Global.debugMenu then
+		if love.keyboard.isDown("lctrl") then
+			if y > 0 then
+				Camera.cam:setScale(Camera.cam.scale + 0.05)
+			elseif y < 0 then
+				Camera.cam:setScale(Camera.cam.scale - 0.05)
+			end
 		end
 	end
 end
