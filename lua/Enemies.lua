@@ -18,7 +18,6 @@ end
 local passableBlocks = {
     [BlockType.Air] = true,
     [BlockType.Water] = true,
-    [BlockType.Lava] = true,
     [BlockType.Torch] = true,
 }
 
