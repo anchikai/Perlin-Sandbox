@@ -155,5 +155,3 @@ function math.map(min1, max1, min2, max2)
 		return (value - min1) * interval2 / interval1 + min2
 	end
 end
-
-print(love)
