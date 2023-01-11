@@ -54,6 +54,7 @@ function love.draw()
 		Cave.draw(l, t, w, h)
 		Enemies.draw()
 		Player.draw()
+		Cave.lighting(l, t, w, h)
 	end)
 	UI.draw(WIDTH, HEIGHT)
 end

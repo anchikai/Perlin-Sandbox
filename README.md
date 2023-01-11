@@ -10,3 +10,4 @@ A basic top-down sandbox game made in Love2D.
 - [ ] Add better mining/building
 - [x] Add better inventory system
 - [ ] Add better crafting system
+- [x] Add a lighting system similar to Minecraft's

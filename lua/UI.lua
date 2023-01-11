@@ -24,13 +24,39 @@ local function PlayerInventory(w, h)
         if Player.inventory[i + 1].Type ~= BlockType.Air then
             love.graphics.setColor(1, 1, 1, 1)
             love.graphics.print(tostring(Player.inventory[i + 1].Amount), (w / 2) + (i * slotSize) - (Player.inventorySize * slotSize) / 2, h - 18) -- Amount of Items (Text)
-            love.graphics.draw(Assets.gfx.Blocks, Assets.gfx.BlockTypes[Player.inventory[i + 1].Type + 2], (w / 2) + (i * slotSize) - (Player.inventorySize * slotSize) / 2 + (Global.unitSize / 2), h - (Global.unitSize * 1.5)) -- The Item Sprite
+            love.graphics.draw(Assets.gfx.Blocks, Assets.gfx.BlockTypes[Player.inventory[i + 1].Type + 1], (w / 2) + (i * slotSize) - (Player.inventorySize * slotSize) / 2 + (Global.unitSize / 2), h - (Global.unitSize * 1.5)) -- The Item Sprite
         end
     end
 
     -- Selected Item
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.rectangle("line", (w / 2) + ((Player.selectedItem - 1) * slotSize) - (Player.inventorySize * slotSize) / 2, h - slotSize, slotSize, slotSize)
+end
+
+---@param text string
+---@param cost1 number
+---@param cost2 number
+---@param newItem BlockType
+---@param amount number
+local function multiRecipe(text, cost1, cost2, newItem, amount)
+    if UI.nuklear:button(text) then
+        for i = 1, Player.inventorySize do
+            for j = 1, Player.inventorySize do
+                if Player.inventory[i].Type == BlockType.Stone and Player.inventory[j].Type == BlockType.Coal
+                and Player.inventory[i].Amount >= cost1 and Player.inventory[j].Amount >= cost2 then
+                    for k = 1, Player.inventorySize do
+                        if Player.inventory[k].Type == newItem or Player.inventory[k].Type == BlockType.Air then
+                            Player.inventory[i].Amount = Player.inventory[i].Amount - cost1
+                            Player.inventory[j].Amount = Player.inventory[j].Amount - cost2
+                            Player.inventory[k].Type = BlockType.Torch
+                            Player.inventory[k].Amount = Player.inventory[k].Amount + amount
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
 
 local function upgradeOre(ore, text, cost)
@@ -51,6 +77,7 @@ local function CraftingMenu(w, h)
         UI.nuklear:windowBegin('Crafting', (w / 2) - (w / 4), (h / 2) - (h / 4), w / 2, h / 2, 'border', 'title', 'scrollbar')
         UI.nuklear:layoutRow('dynamic', 30, 1)
 
+        multiRecipe("3 Torch: 12 Stone, 3 Coal", 12, 3, BlockType.Torch, 3)
         upgradeOre(BlockType.Stone, "Stone Upgrade: 150 Stone", 150)
         upgradeOre(BlockType.Iron, "Iron Upgrade: 30 Iron", 30)
         upgradeOre(BlockType.Gold, "Gold Upgrade: 15 Gold", 15)

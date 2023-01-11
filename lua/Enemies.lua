@@ -1,6 +1,7 @@
 local Cave = require("lua.Cave")
 local Global = require("lua.GlobalValues")
 local Camera = require("lua.Camera")
+local BlockType = require("lua.BlockType")
 
 local Enemies = {
     enemies = {},
@@ -37,7 +38,8 @@ function Enemies.update(dt)
         enemy.start = Vector(math.floor(enemy.x / Global.unitSize + 0.5), math.floor(enemy.y / Global.unitSize + 0.5))
         enemy.finish = Vector(math.floor(playerX / Global.unitSize), math.floor(playerY / Global.unitSize))
         enemy.path = Luafinding(enemy.start, enemy.finish, function(pos)
-            return Cave.getBlockType(pos.x, pos.y) == 0 and math.dist(playerX, playerY, pos.x * Global.unitSize, pos.y * Global.unitSize) < Global.unitSize * Enemies.despawnRange
+            return (Cave.getBlockType(pos.x, pos.y) == BlockType.Air or Cave.getBlockType(pos.x, pos.y) == BlockType.Torch)
+            and math.dist(playerX, playerY, pos.x * Global.unitSize, pos.y * Global.unitSize) < Global.unitSize * Enemies.despawnRange
         end):GetPath()
 
         if enemy.path then

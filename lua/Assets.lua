@@ -17,7 +17,7 @@ function Assets.load()
     local grid = anim8.newGrid(GlobalValues.unitSize, GlobalValues.unitSize, w, h, 0, 0, 2)
 
     for _, i in pairs(BlockType) do
-        i = i + 2
+        i = i + 1
         Assets.gfx.BlockTypes[i] = grid(i, 1)[1]
     end
 end

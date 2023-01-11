@@ -1,5 +1,4 @@
 local BlockType = {
-    WorldBorder = -1,
     Air = 0,
     Stone = 1,
     Iron = 2,
@@ -8,6 +7,8 @@ local BlockType = {
     Ruby = 5,
     Water = 6,
     Lava = 7,
+    Coal = 8,
+    Torch = 9,
 } ---@alias BlockType number
 
 return BlockType
