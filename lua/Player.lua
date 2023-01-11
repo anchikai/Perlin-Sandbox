@@ -4,6 +4,7 @@ local Camera = require("lua.Camera")
 local BlockType = require("lua.BlockType")
 local Assets = require("lua.Assets")
 local Enemies = require("lua.Enemies")
+local Vector = require("lib.vector")
 
 local Player = {
     x = 0, ---@type number
@@ -42,16 +43,16 @@ local passableBlocks = {
 ---@param clearance number
 local function Movement(dt, clearance)
     if not Player.crafting then
-        if love.keyboard.isDown("w") and passableBlocks[Cave.getBlockType(math.floor((Player.x + (Player.size / 2)) / Global.unitSize), math.floor((Player.y - clearance) / Global.unitSize))] then
+        if love.keyboard.isDown("w") and passableBlocks[Cave.getBlockType(math.floor(Player.x / Global.unitSize), math.floor((Player.y - (Player.size / 2)) / Global.unitSize))] then
             Player.y = Player.y - Player.speed * dt
         end
-        if love.keyboard.isDown("a") and passableBlocks[Cave.getBlockType(math.floor((Player.x - clearance) / Global.unitSize), math.floor((Player.y + (Player.size / 2)) / Global.unitSize))] then
+        if love.keyboard.isDown("a") and passableBlocks[Cave.getBlockType(math.floor((Player.x - (Player.size / 2)) / Global.unitSize), math.floor(Player.y / Global.unitSize))] then
             Player.x = Player.x - Player.speed * dt
         end
-        if love.keyboard.isDown("s") and passableBlocks[Cave.getBlockType(math.floor((Player.x + (Player.size / 2)) / Global.unitSize), math.floor((Player.y + Player.size + clearance) / Global.unitSize))] then
+        if love.keyboard.isDown("s") and passableBlocks[Cave.getBlockType(math.floor(Player.x / Global.unitSize), math.floor((Player.y + (Player.size / 2)) / Global.unitSize))] then
             Player.y = Player.y + Player.speed * dt
         end
-        if love.keyboard.isDown("d") and passableBlocks[Cave.getBlockType(math.floor((Player.x + Player.size + clearance) / Global.unitSize), math.floor((Player.y + (Player.size / 2)) / Global.unitSize))] then
+        if love.keyboard.isDown("d") and passableBlocks[Cave.getBlockType(math.floor((Player.x + (Player.size / 2)) / Global.unitSize), math.floor(Player.y / Global.unitSize))] then
             Player.x = Player.x + Player.speed * dt
         end
     end
@@ -119,7 +120,10 @@ local replacableBlocks = {
 local function Build(range)
     local mx, my = love.mouse.getPosition()
     local wmx, wmy = Camera.cam:toWorld(mx, my)
+
     if love.mouse.isDown(2) and not Player.crafting then
+        if Vector(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize)) == Vector(math.floor(Player.x / Global.unitSize), math.floor(Player.y / Global.unitSize)) then return end
+
         if math.abs(math.floor(wmx / Global.unitSize) - math.floor(Player.x / Global.unitSize)) <= range
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range
         and replacableBlocks[Cave.getBlockType(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize))] then
@@ -191,6 +195,8 @@ function Player.load()
     for i = 1, Player.inventorySize do
         table.insert(Player.inventory, i, {Type = BlockType.Air, Amount = 0})
     end
+    Player.x = Player.x + 16
+    Player.y = Player.y + 16
 end
 
 ---@param dt number
@@ -205,7 +211,7 @@ end
 
 function Player.draw()
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.rectangle("fill", Player.x, Player.y, Player.size, Player.size)
+    love.graphics.rectangle("fill", Player.x - (Player.size / 2), Player.y - (Player.size / 2), Player.size, Player.size)
     PlayerGridCursor(Player.range)
 end
 

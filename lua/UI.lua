@@ -2,6 +2,7 @@ local Player = require("lua.Player")
 local Global = require("lua.GlobalValues")
 local Assets = require("lua.Assets")
 local BlockType = require("lua.BlockType")
+local Camera    = require("lua.Camera")
 
 local UI = {
     nuklear = require("nuklear").newUI()
@@ -106,7 +107,9 @@ local function DebugMenu(w, h)
         love.graphics.setFont(font(16))
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.print("x: " .. tostring(math.floor(Player.x / Global.unitSize) .. " " .. "y: " ..  math.floor(Player.y / Global.unitSize)))
-        love.graphics.print(love.timer.getFPS().." FPS", 0, h - 16)
+        local FPS = love.timer.getFPS().." FPS"
+        love.graphics.print(FPS, 0, h - 16)
+        love.graphics.print("Zoom: "..Camera.cam:getScale().."x", 0 + font(16):getWidth(FPS) * 2, h - 16)
     end
 end
 

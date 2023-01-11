@@ -1,14 +1,16 @@
-local Player = require("lua.Player")
+local Player  = require("lua.Player")
 local Cave = require("lua.Cave")
 local UI = require("lua.UI")
 local Enemies = require("lua.Enemies")
-local Assets  = require("lua.Assets")
+local Assets = require("lua.Assets")
 local Global = require("lua.GlobalValues")
+local BlockType = require("lua.BlockType")
 
 local WIDTH, HEIGHT = 1280, 720
 
 local gamera = require("lib.gamera")
 local Camera = require("lua.Camera")
+local Vector = require("lib.vector")
 
 ---@type love.load
 function love.load()
@@ -43,7 +45,7 @@ function love.update(dt)
 	Cave.update(dt)
 	Player.update(dt)
 	Enemies.update(dt)
-	Camera.cam:setPosition(Player.x + (Player.size / 2), Player.y + (Player.size / 2))
+	Camera.cam:setPosition(Player.x , Player.y)
 	Camera.cam:setWindow(0, 0, WIDTH, HEIGHT)
 	UI.update(WIDTH, HEIGHT)
 end
@@ -79,6 +81,36 @@ function love.keypressed(key, scancode, isrepeat)
 	if Global.debugMenu then
 		if key == "k" then
 			Enemies.enemies = {}
+		end
+		if key == "tab" then
+			local rx, ry
+			local spawnRadius = Global.unitSize * (Enemies.despawnRange / 2)
+			local passableBlocks = {
+				[BlockType.Air] = true,
+				[BlockType.Water] = true,
+				[BlockType.Torch] = true,
+			}
+			repeat
+				local r = spawnRadius * math.sqrt((love.math.random() * 0.5))
+				local theta = love.math.random() * 2 * math.pi
+				rx = Player.x + r * math.cos(theta)
+				ry = Player.y + r * math.sin(theta)
+			until passableBlocks[Cave.getBlockType(math.floor(rx / Global.unitSize), math.floor(ry / Global.unitSize))]
+			table.insert(Enemies.enemies, {
+				x = rx,
+				y = ry,
+				hp = 10,
+				maxHp = 10,
+				hit = false,
+				wandering = false,
+				invulnerabilityTime = 1,
+				playerPath = nil,
+				wanderingPath = nil,
+				hasRandomPath = false,
+				path = nil,
+				start = Vector(rx, ry),
+				finish = Vector(math.floor(Player.x / Global.unitSize), math.floor(Player.y / Global.unitSize))
+			})
 		end
 	end
 end
