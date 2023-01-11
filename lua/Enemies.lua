@@ -35,6 +35,7 @@ function Enemies.update(dt)
         table.insert(Enemies.enemies, {
             x = rx,
             y = ry,
+            hp = 10,
             path = nil,
             start = Vector(rx, ry),
             finish = Vector(math.floor(playerX / Global.unitSize), math.floor(playerY / Global.unitSize))

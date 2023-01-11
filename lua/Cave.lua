@@ -9,7 +9,7 @@ local Cave = {
 }
 
 local chunkSize = 64
-local minLight = 0.2
+local minLight = 0.1
 
 ---@class Block
 ---What kind of block it is.
@@ -39,8 +39,8 @@ local goldBaseX, goldBaseY = 10000 * love.math.random(), 10000 * love.math.rando
 local ironBaseX, ironBaseY = 10000 * love.math.random(), 10000 * love.math.random()
 local coalBaseX, coalBaseY = 10000 * love.math.random(), 10000 * love.math.random()
 
-local waterBaseX, waterBaseY = 10000 * love.math.random(), 10000 * love.math.random()
-local lavaBaseX, lavaBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+local waterDeciderX, waterDeciderY = math.pi * love.math.random(), math.pi * love.math.random()
+local lavaDeciderX, lavaDeciderY = math.pi * love.math.random(), math.pi * love.math.random()
 
 ---@param chunk Chunk
 local function addOres(chunk)
@@ -72,16 +72,26 @@ local function addOres(chunk)
     end
 end
 
-local function addLiquids(chunk)
-    for y = 2, chunkSize - 1 do
-        for x = 2, chunkSize - 1 do
-            local waterNoise = love.math.noise(waterBaseX + 0.1 * (chunk.pos.x + x), waterBaseY + 0.1 * (chunk.pos.y + y))
-            local lavaNoise = love.math.noise(lavaBaseX + 0.1 * (chunk.pos.x + x), lavaBaseY + 0.1 * (chunk.pos.y + y))
+local Replacable = {
+    [BlockType.Air] = true,
+    [BlockType.Stone] = true,
+    [BlockType.Iron] = true,
+    [BlockType.Gold] = true,
+    [BlockType.Diamond] = true,
+    [BlockType.Ruby] = true,
+    [BlockType.Coal] = true,
+}
 
-            if chunk.grid[x][y].type == BlockType.Air then
-                if lavaNoise >= 0.99 then
+local function addLiquids(chunk)
+    for y = 1, chunkSize do
+        for x = 1, chunkSize do
+            local waterNoise = love.math.noise(waterDeciderX + 0.02 * (chunk.pos.x + x), waterDeciderY + 0.02 * (chunk.pos.y + y))
+            local lavaNoise = love.math.noise(lavaDeciderX + 0.02 * (chunk.pos.x + x), lavaDeciderY + 0.02 * (chunk.pos.y + y))
+
+            if Replacable[chunk.grid[x][y].type] then
+                if lavaNoise >= 0.89 then
                     chunk.grid[x][y].type = BlockType.Lava
-                elseif waterNoise >= 0.98 then
+                elseif waterNoise >= 0.97 then
                     chunk.grid[x][y].type = BlockType.Water
                 end
             end

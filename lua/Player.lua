@@ -67,7 +67,8 @@ local function Mine(range)
             local block = Cave.getBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize))
 
             if not block then return end
-            -- if block == BlockType.WorldBorder then return end
+            if block.type == BlockType.Water then return end
+            if block.type == BlockType.Lava then return end
             if block.type == BlockType.Air then return end
             if block.type == BlockType.Iron and Player.upgrades[1] == 0 then return end
             if block.type == BlockType.Gold and Player.upgrades[2] == 0 then return end
@@ -108,6 +109,12 @@ local function Mine(range)
     end
 end
 
+local replacableBlocks = {
+    [BlockType.Air] = true,
+    [BlockType.Water] = true,
+    [BlockType.Lava] = true,
+}
+
 ---@param range number
 local function Build(range)
     local mx, my = love.mouse.getPosition()
@@ -115,7 +122,7 @@ local function Build(range)
     if love.mouse.isDown(2) and not Player.crafting then
         if math.abs(math.floor(wmx / Global.unitSize) - math.floor(Player.x / Global.unitSize)) <= range
         and math.abs(math.floor(wmy / Global.unitSize) - math.floor(Player.y / Global.unitSize)) <= range
-        and Cave.getBlockType(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize)) == BlockType.Air then
+        and replacableBlocks[Cave.getBlockType(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize))] then
             if Player.inventory[Player.selectedItem].Amount > 0 then
                 Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), Player.inventory[Player.selectedItem].Type)
                 Player.inventory[Player.selectedItem].Amount = Player.inventory[Player.selectedItem].Amount - 1
@@ -171,6 +178,12 @@ local function handleDamage(dt, time)
             Player.hit = true
             Player.hp = Player.hp - 1
         end
+    end
+
+    if Cave.getBlockType(math.floor(Player.x / Global.unitSize), math.floor(Player.y / Global.unitSize)) == BlockType.Lava then
+        Player.hit = true
+        Player.invulnerabilityTime = Player.invulnerabilityTime / 2
+        Player.hp = Player.hp - 1
     end
 end
 
