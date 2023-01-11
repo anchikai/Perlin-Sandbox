@@ -39,6 +39,9 @@ local goldBaseX, goldBaseY = 10000 * love.math.random(), 10000 * love.math.rando
 local ironBaseX, ironBaseY = 10000 * love.math.random(), 10000 * love.math.random()
 local coalBaseX, coalBaseY = 10000 * love.math.random(), 10000 * love.math.random()
 
+local waterBaseX, waterBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+local lavaBaseX, lavaBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+
 ---@param chunk Chunk
 local function addOres(chunk)
     for y = 2, chunkSize - 1 do
@@ -63,6 +66,23 @@ local function addOres(chunk)
                     elseif coalNoise >= 0.945 then
                         chunk.grid[x][y].type = BlockType.Coal
                     end
+                end
+            end
+        end
+    end
+end
+
+local function addLiquids(chunk)
+    for y = 2, chunkSize - 1 do
+        for x = 2, chunkSize - 1 do
+            local waterNoise = love.math.noise(waterBaseX + 0.1 * (chunk.pos.x + x), waterBaseY + 0.1 * (chunk.pos.y + y))
+            local lavaNoise = love.math.noise(lavaBaseX + 0.1 * (chunk.pos.x + x), lavaBaseY + 0.1 * (chunk.pos.y + y))
+
+            if chunk.grid[x][y].type == BlockType.Air then
+                if lavaNoise >= 0.99 then
+                    chunk.grid[x][y].type = BlockType.Lava
+                elseif waterNoise >= 0.98 then
+                    chunk.grid[x][y].type = BlockType.Water
                 end
             end
         end
@@ -95,8 +115,9 @@ local function generateChunk(pos)
     -- Make the normal part of the chunk (Stone)
     generateCave(chunk)
 
-    -- Populate the stone with ore
+    -- Populate the world with ore and others
     addOres(chunk)
+    addLiquids(chunk)
 
     return chunk
 end
@@ -126,6 +147,11 @@ local function updateChunks()
     end
 end
 
+local lightBlocks = {
+    BlockType.Lava,
+    BlockType.Torch,
+}
+
 local function updateLightLevel()
     -- Get bounds for visible blocks
     local camX, camY, camWidth, camHeight = Camera.cam:getVisible()
@@ -138,25 +164,27 @@ local function updateLightLevel()
     for y = minY, maxY do
         for x = minX, maxX do
             local block = Cave.getBlock(x, y)
-            if block and block.type == BlockType.Torch then
-                block.lightLevel = 1
-                for i = -1, 1 do
-                    local adjacentBlocks =  Cave.getBlock(x + i, y)
-                    if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and i ~= 0 then
-                        adjacentBlocks.lightLevel = block.lightLevel - 0.1
+            for _, h in pairs(BlockType) do
+                if block and block.type == lightBlocks[h] then
+                    block.lightLevel = 1
+                    for i = -1, 1 do
+                        local adjacentBlocks =  Cave.getBlock(x + i, y)
+                        if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and i ~= 0 then
+                            adjacentBlocks.lightLevel = block.lightLevel - 0.1
+                        end
+                    end
+                    for j = -1, 1 do
+                        local adjacentBlocks = Cave.getBlock(x, y + j)
+                        if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and j ~= 0 then
+                            adjacentBlocks.lightLevel = block.lightLevel - 0.1
+                        end
+                    end
+                else
+                    local l, r, u, d = Cave.getAdjacentBlocks(x, y)
+                    if (l and l.type ~= lightBlocks[h]) and (r and r.type ~= lightBlocks[h]) and (u and u.type ~= lightBlocks[h]) and (d and d.type ~= lightBlocks[h]) then
+                        block.lightLevel = (l.lightLevel + r.lightLevel + u.lightLevel + d.lightLevel) / 4
                     end
                 end
-                for j = -1, 1 do
-                    local adjacentBlocks = Cave.getBlock(x, y + j)
-                    if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and j ~= 0 then
-                        adjacentBlocks.lightLevel = block.lightLevel - 0.1
-                    end
-                end
-            else
-				local l, r, u, d = Cave.getAdjacentBlocks(x, y)
-				if (l and l.type ~= BlockType.Torch) and (r and r.type ~= BlockType.Torch) and (u and u.type ~= BlockType.Torch) and (d and d.type ~= BlockType.Torch) then
-					block.lightLevel = (l.lightLevel + r.lightLevel + u.lightLevel + d.lightLevel) / 4
-				end
             end
         end
     end

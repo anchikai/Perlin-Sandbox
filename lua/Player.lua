@@ -34,6 +34,8 @@ local Player = {
 
 local passableBlocks = {
     BlockType.Air,
+    BlockType.Water,
+    BlockType.Lava,
     BlockType.Torch,
 }
 ---@param dt number
