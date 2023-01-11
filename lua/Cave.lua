@@ -148,8 +148,8 @@ local function updateChunks()
 end
 
 local lightBlocks = {
-    BlockType.Lava,
-    BlockType.Torch,
+    [BlockType.Lava] = true,
+    [BlockType.Torch] = true,
 }
 
 local function updateLightLevel()
@@ -164,26 +164,24 @@ local function updateLightLevel()
     for y = minY, maxY do
         for x = minX, maxX do
             local block = Cave.getBlock(x, y)
-            for _, h in pairs(BlockType) do
-                if block and block.type == lightBlocks[h] then
-                    block.lightLevel = 1
-                    for i = -1, 1 do
-                        local adjacentBlocks =  Cave.getBlock(x + i, y)
-                        if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and i ~= 0 then
-                            adjacentBlocks.lightLevel = block.lightLevel - 0.1
-                        end
+            if block and lightBlocks[block.type] then
+                block.lightLevel = 1
+                for i = -1, 1 do
+                    local adjacentBlocks =  Cave.getBlock(x + i, y)
+                    if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and i ~= 0 then
+                        adjacentBlocks.lightLevel = block.lightLevel - 0.1
                     end
-                    for j = -1, 1 do
-                        local adjacentBlocks = Cave.getBlock(x, y + j)
-                        if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and j ~= 0 then
-                            adjacentBlocks.lightLevel = block.lightLevel - 0.1
-                        end
+                end
+                for j = -1, 1 do
+                    local adjacentBlocks = Cave.getBlock(x, y + j)
+                    if adjacentBlocks and adjacentBlocks.lightLevel < block.lightLevel and j ~= 0 then
+                        adjacentBlocks.lightLevel = block.lightLevel - 0.1
                     end
-                else
-                    local l, r, u, d = Cave.getAdjacentBlocks(x, y)
-                    if (l and l.type ~= lightBlocks[h]) and (r and r.type ~= lightBlocks[h]) and (u and u.type ~= lightBlocks[h]) and (d and d.type ~= lightBlocks[h]) then
-                        block.lightLevel = (l.lightLevel + r.lightLevel + u.lightLevel + d.lightLevel) / 4
-                    end
+                end
+            else
+                local l, r, u, d = Cave.getAdjacentBlocks(x, y)
+                if (l and not lightBlocks[l.type]) and (r and not lightBlocks[r.type]) and (u and not lightBlocks[u.type]) and (d and not lightBlocks[d.type]) then
+                    block.lightLevel = (l.lightLevel + r.lightLevel + u.lightLevel + d.lightLevel) / 4
                 end
             end
         end

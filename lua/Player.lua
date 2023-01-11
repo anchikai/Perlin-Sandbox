@@ -33,28 +33,26 @@ local Player = {
 }
 
 local passableBlocks = {
-    BlockType.Air,
-    BlockType.Water,
-    BlockType.Lava,
-    BlockType.Torch,
+    [BlockType.Air] = true,
+    [BlockType.Water] = true,
+    [BlockType.Lava] = true,
+    [BlockType.Torch] = true,
 }
 ---@param dt number
 ---@param clearance number
 local function Movement(dt, clearance)
     if not Player.crafting then
-        for _, i in pairs(BlockType) do
-            if love.keyboard.isDown("w") and Cave.getBlockType(math.floor((Player.x + (Player.size / 2)) / Global.unitSize), math.floor((Player.y - clearance) / Global.unitSize)) == passableBlocks[i] then
-                Player.y = Player.y - Player.speed * dt
-            end
-            if love.keyboard.isDown("a") and Cave.getBlockType(math.floor((Player.x - clearance) / Global.unitSize), math.floor((Player.y + (Player.size / 2)) / Global.unitSize)) == passableBlocks[i] then
-                Player.x = Player.x - Player.speed * dt
-            end
-            if love.keyboard.isDown("s") and Cave.getBlockType(math.floor((Player.x + (Player.size / 2)) / Global.unitSize), math.floor((Player.y + Player.size + clearance) / Global.unitSize)) == passableBlocks[i] then
-                Player.y = Player.y + Player.speed * dt
-            end
-            if love.keyboard.isDown("d") and Cave.getBlockType(math.floor((Player.x + Player.size + clearance) / Global.unitSize), math.floor((Player.y + (Player.size / 2)) / Global.unitSize)) == passableBlocks[i] then
-                Player.x = Player.x + Player.speed * dt
-            end
+        if love.keyboard.isDown("w") and passableBlocks[Cave.getBlockType(math.floor((Player.x + (Player.size / 2)) / Global.unitSize), math.floor((Player.y - clearance) / Global.unitSize))] then
+            Player.y = Player.y - Player.speed * dt
+        end
+        if love.keyboard.isDown("a") and passableBlocks[Cave.getBlockType(math.floor((Player.x - clearance) / Global.unitSize), math.floor((Player.y + (Player.size / 2)) / Global.unitSize))] then
+            Player.x = Player.x - Player.speed * dt
+        end
+        if love.keyboard.isDown("s") and passableBlocks[Cave.getBlockType(math.floor((Player.x + (Player.size / 2)) / Global.unitSize), math.floor((Player.y + Player.size + clearance) / Global.unitSize))] then
+            Player.y = Player.y + Player.speed * dt
+        end
+        if love.keyboard.isDown("d") and passableBlocks[Cave.getBlockType(math.floor((Player.x + Player.size + clearance) / Global.unitSize), math.floor((Player.y + (Player.size / 2)) / Global.unitSize))] then
+            Player.x = Player.x + Player.speed * dt
         end
     end
 end
@@ -106,7 +104,6 @@ local function Mine(range)
                     end
                 end
             end
-            
         end
     end
 end

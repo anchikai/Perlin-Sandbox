@@ -15,6 +15,12 @@ function Enemies.load()
     
 end
 
+local passableBlocks = {
+    [BlockType.Air] = true,
+    [BlockType.Water] = true,
+    [BlockType.Torch] = true,
+}
+
 function Enemies.update(dt)
     local playerX, playerY = Camera.cam:getPosition()
     if love.math.random() <= 0.0005 then
@@ -38,8 +44,7 @@ function Enemies.update(dt)
         enemy.start = Vector(math.floor(enemy.x / Global.unitSize + 0.5), math.floor(enemy.y / Global.unitSize + 0.5))
         enemy.finish = Vector(math.floor(playerX / Global.unitSize), math.floor(playerY / Global.unitSize))
         enemy.path = Luafinding(enemy.start, enemy.finish, function(pos)
-            return (Cave.getBlockType(pos.x, pos.y) == BlockType.Air or Cave.getBlockType(pos.x, pos.y) == BlockType.Torch)
-            and math.dist(playerX, playerY, pos.x * Global.unitSize, pos.y * Global.unitSize) < Global.unitSize * Enemies.despawnRange
+            return passableBlocks[Cave.getBlockType(pos.x, pos.y)] and math.dist(playerX, playerY, pos.x * Global.unitSize, pos.y * Global.unitSize) < Global.unitSize * Enemies.despawnRange
         end):GetPath()
 
         if enemy.path then
