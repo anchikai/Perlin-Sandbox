@@ -147,3 +147,13 @@ end
 function math.angle(x1, y1, x2, y2)
 	return math.atan2(y2 - y1, x2 - x1)
 end
+
+function math.map(min1, max1, min2, max2)
+	local interval1 = max1 - min1
+	local interval2 = max2 - min2
+	return function(value)
+		return (value - min1) * interval2 / interval1 + min2
+	end
+end
+
+print(love)
