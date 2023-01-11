@@ -18,12 +18,33 @@ end
 local passableBlocks = {
     [BlockType.Air] = true,
     [BlockType.Water] = true,
+    [BlockType.Lava] = true,
     [BlockType.Torch] = true,
 }
 
+local function handleDamage(dt, time)
+    for i, enemy in ipairs(Enemies.enemies) do
+        if enemy.hit and enemy.invulnerabilityTime > 0 then
+            enemy.invulnerabilityTime = enemy.invulnerabilityTime - dt
+            return
+        else
+            enemy.hit = false
+            enemy.invulnerabilityTime = time
+        end
+        if Cave.getBlockType(math.floor(enemy.x / Global.unitSize), math.floor(enemy.y / Global.unitSize)) == BlockType.Lava then
+            enemy.hit = true
+            enemy.invulnerabilityTime = enemy.invulnerabilityTime / 2
+            enemy.hp = enemy.hp - 1
+            if enemy.hp == 0 then
+                table.remove(Enemies.enemies, i)
+            end
+        end
+    end
+end
+
 function Enemies.update(dt)
     local playerX, playerY = Camera.cam:getPosition()
-    if love.math.random() <= 0.0005 then
+    if love.math.random() <= 0.005 then
         local rx, ry
         local spawnRadius = Global.unitSize * (Enemies.despawnRange / 2)
         repeat
@@ -36,6 +57,9 @@ function Enemies.update(dt)
             x = rx,
             y = ry,
             hp = 10,
+            maxHp = 10,
+            hit = false,
+            invulnerabilityTime = 1,
             path = nil,
             start = Vector(rx, ry),
             finish = Vector(math.floor(playerX / Global.unitSize), math.floor(playerY / Global.unitSize))
@@ -60,6 +84,17 @@ function Enemies.update(dt)
             table.remove(Enemies.enemies, i)
         end
     end
+
+    handleDamage(dt, 1)
+end
+
+local function healthBar()
+    for i, enemy in ipairs(Enemies.enemies) do
+        love.graphics.setColor(1, 0, 0, 1)
+        love.graphics.rectangle("fill", enemy.x, enemy.y + Global.unitSize + 3, math.map(enemy.hp, 0, enemy.maxHp, 0, Global.unitSize), 4)
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("line", enemy.x, enemy.y + Global.unitSize + 3, Global.unitSize, 4)
+    end
 end
 
 function Enemies.draw()
@@ -72,6 +107,7 @@ function Enemies.draw()
         end
         love.graphics.setColor(1, 0, 0, 1)
         love.graphics.rectangle("fill", enemy.x, enemy.y, Global.unitSize, Global.unitSize)
+        healthBar()
     end
 end
 
