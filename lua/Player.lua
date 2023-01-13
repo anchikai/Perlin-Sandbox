@@ -20,17 +20,19 @@ local Player = {
     invulnerabilityTime = 1, ---@type number
 
     upgrades = {
-        0,
-        0,
-        0,
-        0,
-        0,
+        [BlockType.Stone] = 0,
+        [BlockType.Iron] = 0,
+        [BlockType.Gold] = 0,
+        [BlockType.Diamond] = 0,
+        [BlockType.Ruby] = 0,
     },
 
     inventory = {},
     inventorySize = 8, ---@type number
     selectedItem = 1, ---@type number
     crafting = false, ---@type boolean
+
+    dugDeeper = false,
 }
 
 local passableBlocks = {
@@ -38,6 +40,7 @@ local passableBlocks = {
     [BlockType.Water] = true,
     [BlockType.Lava] = true,
     [BlockType.Torch] = true,
+    [BlockType.Deeper] = true,
 }
 ---@param dt number
 ---@param clearance number
@@ -58,6 +61,27 @@ local function Movement(dt, clearance)
     end
 end
 
+local function goDeeper()
+    local wpx, wpy = math.floor(Player.x / Global.unitSize), math.floor(Player.y / Global.unitSize)
+    if Cave.getBlockType(wpx, wpy) == BlockType.Deeper then
+        Cave.newZone(Player)
+    end
+end
+
+local nonMinables = {
+    [BlockType.Water] = true,
+    [BlockType.Lava] = true,
+    [BlockType.Deeper] = true,
+}
+
+local requiredUpgrade = {
+    [BlockType.Iron] = BlockType.Stone,
+    [BlockType.Gold] = BlockType.Iron,
+    [BlockType.Diamond] = BlockType.Gold,
+    [BlockType.Ruby] = BlockType.Diamond,
+    [BlockType.Air] = BlockType.Ruby,
+}
+
 ---@param range number
 local function Mine(range)
     local mx, my = love.mouse.getPosition()
@@ -68,24 +92,29 @@ local function Mine(range)
             local block = Cave.getBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize))
 
             if not block then return end
-            if block.type == BlockType.Water then return end
-            if block.type == BlockType.Lava then return end
-            if block.type == BlockType.Air then return end
-            if block.type == BlockType.Iron and Player.upgrades[1] == 0 then return end
-            if block.type == BlockType.Gold and Player.upgrades[2] == 0 then return end
-            if block.type == BlockType.Diamond and Player.upgrades[3] == 0 then return end
-            if block.type == BlockType.Ruby and Player.upgrades[4] == 0 then return end
+            if nonMinables[block.type] then return end
+            if Player.upgrades[requiredUpgrade[block.type]] == 0 then return end
+
             local foundType = false
             for i = 1, Player.inventorySize do
                 if Player.inventory[i].Amount < 256 and Player.inventory[i].Type == block.type then
                     block.integrity = block.integrity - 1
-                    -- print(block.integrity)
                     if block.integrity <= 0 then
-                        Player.inventory[i].Amount = Player.inventory[i].Amount + 1
-                        foundType = true
-                        Assets.sfx.Stone:stop()
-                        Assets.sfx.Stone:play()
-                        Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
+
+                        if Player.upgrades[BlockType.Ruby] == 1 and block.type == BlockType.Air and not Player.dugDeeper then
+                            Player.inventory[i].Amount = Player.inventory[i].Amount + 1
+                            foundType = true
+                            Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Deeper)
+                            Player.dugDeeper = true
+                            Assets.sfx.Stone:stop()
+                            Assets.sfx.Stone:play()
+                        elseif block.type ~= BlockType.Air then
+                            Player.inventory[i].Amount = Player.inventory[i].Amount + 1
+                            foundType = true
+                            Cave.setBlock(math.floor(wmx / Global.unitSize), math.floor(wmy / Global.unitSize), BlockType.Air)
+                            Assets.sfx.Stone:stop()
+                            Assets.sfx.Stone:play()
+                        end
                     end
                     break
                 end
@@ -95,7 +124,7 @@ local function Mine(range)
                 for i = 1, Player.inventorySize do -- Idk why the fuck this doesn't work if I put the below in the above for loop
                     if Player.inventory[i].Amount < 256 and Player.inventory[i].Type == BlockType.Air then
                         block.integrity = block.integrity - 1
-                        if block.integrity <= 0 then
+                        if block.integrity <= 0 and block.type ~= BlockType.Air then
                             Player.inventory[i].Type = block.type
                             Player.inventory[i].Amount = Player.inventory[i].Amount + 1
                             Assets.sfx.Stone:stop()
@@ -192,8 +221,10 @@ local function handleDamage(dt, time)
 end
 
 function Player.load()
-    for i = 1, Player.inventorySize do
-        table.insert(Player.inventory, i, {Type = BlockType.Air, Amount = 0})
+    if Global.CaveZone == 1 then
+        for i = 1, Player.inventorySize do
+            table.insert(Player.inventory, i, {Type = BlockType.Air, Amount = 0})
+        end
     end
     Player.x = Player.x + 16
     Player.y = Player.y + 16
@@ -207,6 +238,7 @@ function Player.update(dt)
     Mine(Player.range)
     Build(Player.range)
     handleDamage(dt, 1)
+    goDeeper()
 end
 
 function Player.draw()

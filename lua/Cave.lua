@@ -5,7 +5,7 @@ local Vector = require("lib.vector")
 local Camera = require("lua.Camera")
 
 local Cave = {
-    Grid = {}
+    Grid = {},
 }
 
 local chunkSize = 64
@@ -198,6 +198,24 @@ local function updateLightLevel()
     end
 end
 
+function Cave.newZone(Player)
+    for k, v in pairs(Player.upgrades) do -- Reset upgrades for later use
+        Player.upgrades[k] = 0
+    end
+    Player.x = 0
+    Player.y = 0
+    Player.dugDeeper = false
+
+    Global.CaveZone = Global.CaveZone + 1
+    if Global.CaveZone == 2 then
+        love.graphics.setBackgroundColor(1 / 3 + 0.063, 1 / 3, 1 / 3, 1)
+    end
+    Assets.load()
+    Player.load()
+    love.math.setRandomSeed(love.timer.getTime())
+    Cave.load()
+end
+
 ---@param x number
 ---@param y number
 ---@param Block BlockType
@@ -252,6 +270,18 @@ function Cave.getAdjacentBlocks(x, y)
 end
 
 function Cave.load()
+    Cave.Grid = {}
+    loadedChunks = {}
+
+    baseX, baseY = 10000 * love.math.random(), 10000 * love.math.random()
+    rubyBaseX, rubyBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+    diamondBaseX, diamondBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+    goldBaseX, goldBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+    ironBaseX, ironBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+    coalBaseX, coalBaseY = 10000 * love.math.random(), 10000 * love.math.random()
+    waterDeciderX, waterDeciderY = math.pi * love.math.random(), math.pi * love.math.random()
+    lavaDeciderX, lavaDeciderY = math.pi * love.math.random(), math.pi * love.math.random()
+
     updateChunks()
 end
 

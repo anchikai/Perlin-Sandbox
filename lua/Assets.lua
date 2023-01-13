@@ -1,5 +1,5 @@
 local anim8 = require("lib.anim8")
-local GlobalValues = require("lua.GlobalValues")
+local Global = require("lua.GlobalValues")
 local BlockType = require("lua.BlockType")
 
 local Assets = {
@@ -14,11 +14,11 @@ local Assets = {
 
 function Assets.load()
     local w, h = Assets.gfx.Blocks:getDimensions()
-    local grid = anim8.newGrid(GlobalValues.unitSize, GlobalValues.unitSize, w, h, 0, 0, 2)
+    local grid = anim8.newGrid(Global.unitSize, Global.unitSize, w, h, 0, 0, 2)
 
     for _, i in pairs(BlockType) do
         i = i + 1
-        Assets.gfx.BlockTypes[i] = grid(i, 1)[1]
+        Assets.gfx.BlockTypes[i] = grid(i, Global.CaveZone)[1]
     end
 end
 
