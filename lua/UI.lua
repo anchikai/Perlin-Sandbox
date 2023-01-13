@@ -8,7 +8,7 @@ local UI = {
     nuklear = require("nuklear").newUI(),
 
     craftingX = -512,
-    craftingY = 0,
+    craftingY = 97,
     craftingW = 300,
 }
 
@@ -123,7 +123,7 @@ end
 
 local function CraftingMenu(w, h)
     UI.nuklear:frameBegin()
-    UI.nuklear:windowBegin('Crafting', UI.craftingX, UI.craftingY, UI.craftingW, h, 'border', 'title', 'scrollbar')
+    UI.nuklear:windowBegin('Crafting', UI.craftingX, UI.craftingY, UI.craftingW, h - 195, 'border', 'title', 'scrollbar')
 
     multiRecipe(BlockType.Stone, BlockType.Coal, "3 Torches", 12, 3, BlockType.Torch, 3)
     upgradeOre(BlockType.Stone, "Stone Upgrade", 150)
