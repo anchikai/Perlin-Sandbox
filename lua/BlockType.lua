@@ -10,6 +10,7 @@ local BlockType = {
     Coal = 8,
     Torch = 9,
     Deeper = 10,
+    Obsidian = 11,
 } ---@alias BlockType number
 
 return BlockType

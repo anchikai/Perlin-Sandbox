@@ -5,7 +5,7 @@ A basic top-down sandbox game made in Love2D.
 - [x] Random World Gen with Perlin Noise
 - [x] Infinite World Gen
 - [x] Add better progression, e.g. "The Drill"
-- [x] Add zones (or biomes, I guess?)
+- [x] Add deeper caves (The equivalent of floors in a roguelike)
 - [ ] Make the game more akin to a roguelike
 - [ ] Add better mining/building
 - [x] Add better inventory system

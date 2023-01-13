@@ -198,6 +198,34 @@ local function updateLightLevel()
     end
 end
 
+local liquidBlocks = {
+    [BlockType.Water] = true,
+    [BlockType.Lava] = true,
+}
+
+local function updateLiquid()
+    -- Get bounds for visible blocks
+    local camX, camY, camWidth, camHeight = Camera.cam:getVisible()
+    local minX = math.floor(camX / Global.unitSize)
+    local minY = math.floor(camY / Global.unitSize)
+    local maxX = math.floor((camX + camWidth) / Global.unitSize)
+    local maxY = math.floor((camY + camHeight) / Global.unitSize)
+
+    -- Update the liquid interactions of every block
+    for y = minY, maxY do
+        for x = minX, maxX do
+            local block = Cave.getBlock(x, y)
+            if block and liquidBlocks[block.type] then
+                local l, r, u, d = Cave.getAdjacentBlocks(x, y)
+                if (l and liquidBlocks[l.type] and block.type ~= l.type) or (r and liquidBlocks[r.type] and block.type ~= r.type) or (u and liquidBlocks[u.type] and block.type ~= u.type) or (d and liquidBlocks[d.type] and block.type ~= d.type) then
+                    block.type = BlockType.Obsidian
+                    break
+                end
+            end
+        end
+    end
+end
+
 function Cave.newZone(Player)
     for k, v in pairs(Player.upgrades) do -- Reset upgrades for later use
         Player.upgrades[k] = 0
@@ -288,6 +316,7 @@ end
 ---@param dt number
 function Cave.update(dt)
     updateChunks()
+    updateLiquid()
     updateLightLevel()
 end
 
